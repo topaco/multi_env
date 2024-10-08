@@ -1,0 +1,28 @@
+# File: .github/actions/read-trains-json/action.yml
+
+name: 'Read Trains JSON'
+description: 'Reads trains.json and outputs environments for the selected train'
+author: 'Your Name <your.email@example.com>'
+inputs:
+  train:
+    description: 'The selected train'
+    required: true
+outputs:
+  environments:
+    description: 'Environments for the selected train'
+runs:
+  using: 'composite'
+  steps:
+    - name: Read Trains JSON
+      id: get-envs
+      shell: bash
+      run: |
+        echo "Selected train: ${{ inputs.train }}"
+        cat $GITHUB_ACTION_PATH/trains.json
+        envs=$(jq -c --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' $GITHUB_ACTION_PATH/trains.json)
+        if [ -z "$envs" ] || [ "$envs" == "null" ]; then
+          echo "Error: Train '${{ inputs.train }}' not found in trains.json"
+          exit 1
+        fi
+        echo "Environments for ${{ inputs.train }}: $envs"
+        echo "environments=$envs" >> $GITHUB_OUTPUT
