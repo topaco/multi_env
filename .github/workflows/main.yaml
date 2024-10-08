@@ -13,19 +13,15 @@ on:
           - prod
         default: dev
 
-env:
-  SERVICE_NAME: shop-cep-service
-  OPERATION: deploy
-
 jobs:
   deploy_dev:
     if: ${{ inputs.start_environment == 'dev' || inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
     name: Deploy to Dev
     uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
-      serviceName: ${{ env.SERVICE_NAME }}
-      operation: ${{ env.OPERATION }}
-      environment: dev
+      serviceName: 'shop-cep-service'
+      operation: 'deploy'
+      environment: 'dev'
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
@@ -35,9 +31,9 @@ jobs:
     name: Deploy to Test
     uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
-      serviceName: ${{ env.SERVICE_NAME }}
-      operation: ${{ env.OPERATION }}
-      environment: test
+      serviceName: 'shop-cep-service'
+      operation: 'deploy'
+      environment: 'test'
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
@@ -47,9 +43,9 @@ jobs:
     name: Deploy to Non-Prod
     uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
-      serviceName: ${{ env.SERVICE_NAME }}
-      operation: ${{ env.OPERATION }}
-      environment: non-prod
+      serviceName: 'shop-cep-service'
+      operation: 'deploy'
+      environment: 'non-prod'
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
@@ -59,8 +55,8 @@ jobs:
     name: Deploy to Prod
     uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
-      serviceName: ${{ env.SERVICE_NAME }}
-      operation: ${{ env.OPERATION }}
-      environment: prod
+      serviceName: 'shop-cep-service'
+      operation: 'deploy'
+      environment: 'prod'
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
