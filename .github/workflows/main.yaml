@@ -21,7 +21,7 @@ jobs:
   deploy_dev:
     if: ${{ inputs.start_environment == 'dev' || inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
     name: Deploy to Dev
-    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
       serviceName: ${{ env.SERVICE_NAME }}
       operation: ${{ env.OPERATION }}
@@ -33,7 +33,7 @@ jobs:
     if: ${{ inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
     needs: deploy_dev
     name: Deploy to Test
-    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
       serviceName: ${{ env.SERVICE_NAME }}
       operation: ${{ env.OPERATION }}
@@ -45,7 +45,7 @@ jobs:
     if: ${{ inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
     needs: deploy_test
     name: Deploy to Non-Prod
-    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
       serviceName: ${{ env.SERVICE_NAME }}
       operation: ${{ env.OPERATION }}
@@ -57,7 +57,7 @@ jobs:
     if: ${{ inputs.start_environment == 'prod' }}
     needs: deploy_non_prod
     name: Deploy to Prod
-    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    uses: topaco/multi_env/.github/workflows/helm.yaml@main
     with:
       serviceName: ${{ env.SERVICE_NAME }}
       operation: ${{ env.OPERATION }}
