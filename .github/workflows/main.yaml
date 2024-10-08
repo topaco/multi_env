@@ -30,93 +30,25 @@ jobs:
         with:
           train: ${{ github.event.inputs.train }}
 
-  deploy_sandbox01:
-    name: Deploy to Sandbox01
+      - name: Debug Prepare Output
+        run: |
+          echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
+
+  deploy:
+    name: Deploy Environments
     needs: prepare
     runs-on: ubuntu-latest
-    if: contains(needs.prepare.outputs.environments, 'sandbox01')
+    strategy:
+      matrix:
+        environment: ${{ fromJson(needs.prepare.outputs.environments) }}
     steps:
-      - name: Deploy to Sandbox01
+      - name: Debug Deploy Matrix
         run: |
-          echo "Deploying to sandbox01 environment"
-          # Add your deployment commands here for sandbox01
+          echo "Deploying to environments: ${{ matrix.environment }}"
 
-  deploy_sandbox02:
-    name: Deploy to Sandbox02
-    needs: prepare
-    runs-on: ubuntu-latest
-    if: contains(needs.prepare.outputs.environments, 'sandbox02')
-    steps:
-      - name: Deploy to Sandbox02
+      - name: Deploy to ${{ matrix.environment }}
         run: |
-          echo "Deploying to sandbox02 environment"
-          # Add your deployment commands here for sandbox02
-
-  deploy_dev:
-    name: Deploy to Dev
-    needs: prepare
-    runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'dev') &&
-      (
-        (
-          contains(needs.prepare.outputs.environments, 'sandbox01') &&
-          needs.deploy_sandbox01.result == 'success'
-        ) || 
-        (
-          contains(needs.prepare.outputs.environments, 'sandbox02') &&
-          needs.deploy_sandbox02.result == 'success'
-        ) || 
-        (
-          !contains(needs.prepare.outputs.environments, 'sandbox01') &&
-          !contains(needs.prepare.outputs.environments, 'sandbox02')
-        )
-      )
-    steps:
-      - name: Deploy to Dev
-        run: |
-          echo "Deploying to dev environment"
-          # Add your deployment commands here for dev
-
-  deploy_non_prod:
-    name: Deploy to Non-Prod
-    needs:
-      - prepare
-      - deploy_dev
-    runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'non-prod') &&
-      (
-        !contains(needs.prepare.outputs.environments, 'dev') ||
-        needs.deploy_dev.result == 'success'
-      )
-    steps:
-      - name: Deploy to Non-Prod
-        run: |
-          echo "Deploying to non-prod environment"
-          # Add your deployment commands here for non-prod
-
-  deploy_test:
-    name: Deploy to Test
-    needs:
-      - prepare
-      - deploy_dev
-      - deploy_non_prod
-    runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'test') &&
-      (
-        (
-          contains(needs.prepare.outputs.environments, 'non-prod') &&
-          needs.deploy_non_prod.result == 'success'
-        ) || 
-        (
-          !contains(needs.prepare.outputs.environments, 'non-prod') &&
-          needs.deploy_dev.result == 'success'
-        )
-      )
-    steps:
-      - name: Deploy to Test
-        run: |
-          echo "Deploying to test environment"
-          # Add your deployment commands here for test
+          echo "Deploying to ${{ matrix.environment }} environment"
+          # Replace the below echo with your actual deployment commands
+          # Example:
+          # ./deploy.sh "${{ matrix.environment }}"
