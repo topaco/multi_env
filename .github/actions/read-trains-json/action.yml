@@ -9,12 +9,10 @@ inputs:
 outputs:
   environments:
     description: 'Environments for the selected train'
-    value: ${{ steps.read-trains.outputs.environments }}
 runs:
   using: 'composite'
   steps:
     - name: Read Trains JSON
-      id: read-trains
       shell: bash
       run: |
         echo "Selected train: ${{ inputs.train }}"
@@ -24,4 +22,4 @@ runs:
           echo "Error: Train '${{ inputs.train }}' not found in trains.json"
           exit 1
         fi
-        echo "environments=$envs" >> "$GITHUB_STEP_OUTPUT"
+        echo "environments=$envs" >> "$GITHUB_OUTPUT"
