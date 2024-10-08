@@ -1,0 +1,38 @@
+# File: .github/workflows/helm.yaml
+
+name: Helm Deployment
+
+on:
+  workflow_call:
+    inputs:
+      serviceName:
+        required: true
+        type: string
+      operation:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+    secrets:
+      PAT_TOKEN:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        run: |
+          # Install Helm or any prerequisites
+          echo "Setting up Helm"
+
+      - name: Deploy to ${{ inputs.environment }}
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "Deploying ${{ inputs.serviceName }} to ${{ inputs.environment }} environment"
+          # Add your deployment commands here
