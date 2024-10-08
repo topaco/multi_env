@@ -30,28 +30,87 @@ jobs:
         with:
           train: ${{ github.event.inputs.train }}
 
-  deploy:
-    name: Deploy Environments
+  deploy_sandbox01:
+    name: Deploy to Sandbox01
     needs: prepare
     runs-on: ubuntu-latest
+    if: contains(needs.prepare.outputs.environments, 'sandbox01')
     steps:
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Debug Outputs
+      - name: Deploy to Sandbox01
         run: |
-          echo "Environments from prepare job: '${{ needs.prepare.outputs.environments }}'"
+          echo "Deploying to sandbox01 environment"
+          # Add your deployment commands here for sandbox01
 
-      - name: Deploy to Environments
-        shell: bash
+  deploy_sandbox02:
+    name: Deploy to Sandbox02
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: contains(needs.prepare.outputs.environments, 'sandbox02')
+    steps:
+      - name: Deploy to Sandbox02
         run: |
-          echo "Environments to deploy: ${{ needs.prepare.outputs.environments }}"
-          envs='${{ needs.prepare.outputs.environments }}'
-          if [ -z "$envs" ] || [ "$envs" == "null" ]; then
-            echo "No environments to deploy."
-            exit 1
-          fi
-          for env in $(echo "$envs" | jq -r '.[]'); do
-            echo "Deploying to $env environment"
-            # Add your deployment commands here
-          done
+          echo "Deploying to sandbox02 environment"
+          # Add your deployment commands here for sandbox02
+
+  deploy_dev:
+    name: Deploy to Dev
+    needs:
+      - prepare
+      - deploy_sandbox01
+      - deploy_sandbox02
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'dev') &&
+      (
+        !contains(needs.prepare.outputs.environments, 'sandbox01') ||
+        needs.deploy_sandbox01.result == 'success' ||
+        needs.deploy_sandbox01.result == 'skipped'
+      ) &&
+      (
+        !contains(needs.prepare.outputs.environments, 'sandbox02') ||
+        needs.deploy_sandbox02.result == 'success' ||
+        needs.deploy_sandbox02.result == 'skipped'
+      )
+    steps:
+      - name: Deploy to Dev
+        run: |
+          echo "Deploying to dev environment"
+          # Add your deployment commands here for dev
+
+  deploy_non_prod:
+    name: Deploy to Non-Prod
+    needs:
+      - prepare
+      - deploy_dev
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'non-prod') &&
+      (
+        !contains(needs.prepare.outputs.environments, 'dev') ||
+        needs.deploy_dev.result == 'success' ||
+        needs.deploy_dev.result == 'skipped'
+      )
+    steps:
+      - name: Deploy to Non-Prod
+        run: |
+          echo "Deploying to non-prod environment"
+          # Add your deployment commands here for non-prod
+
+  deploy_test:
+    name: Deploy to Test
+    needs:
+      - prepare
+      - deploy_non_prod
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'test') &&
+      (
+        !contains(needs.prepare.outputs.environments, 'non-prod') ||
+        needs.deploy_non_prod.result == 'success' ||
+        needs.deploy_non_prod.result == 'skipped'
+      )
+    steps:
+      - name: Deploy to Test
+        run: |
+          echo "Deploying to test environment"
+          # Add your deployment commands here for test
