@@ -46,7 +46,11 @@ jobs:
         shell: bash
         run: |
           echo "Environments to deploy: ${{ needs.prepare.outputs.environments }}"
-          envs="${{ needs.prepare.outputs.environments }}"
+          envs='${{ needs.prepare.outputs.environments }}'
+          if [ -z "$envs" ] || [ "$envs" == "null" ]; then
+            echo "No environments to deploy."
+            exit 1
+          fi
           for env in $(echo "$envs" | jq -r '.[]'); do
             echo "Deploying to $env environment"
             # Add your deployment commands here
