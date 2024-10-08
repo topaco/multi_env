@@ -19,13 +19,13 @@ jobs:
     name: Prepare Environments List
     runs-on: ubuntu-latest
     outputs:
-      environments: ${{ steps.prepare.outputs.environments }}
+      environments: ${{ steps.get-envs.outputs.environments }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Read Trains JSON
-        id: prepare
+        id: get-envs
         uses: ./.github/actions/read-trains-json
         with:
           train: ${{ github.event.inputs.train }}
@@ -35,12 +35,15 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Deploy to Environments
         shell: bash
         run: |
           echo "Environments to deploy: ${{ needs.prepare.outputs.environments }}"
-          envs=${{ needs.prepare.outputs.environments }}
-          for env in $(echo $envs | jq -r '.[]'); do
+          envs='${{ needs.prepare.outputs.environments }}'
+          for env in $(echo "$envs" | jq -r '.[]'); do
             echo "Deploying to $env environment"
             # Add your deployment commands here
           done
