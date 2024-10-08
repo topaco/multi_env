@@ -12,6 +12,14 @@ on:
           - non-prod
           - prod
         default: dev
+      service_name:
+        type: string
+        description: 'Service name'
+        default: 'shop-cep-service'
+      operation:
+        type: string
+        description: 'Operation'
+        default: 'deploy'       
 
 jobs:
   deploy_dev:
