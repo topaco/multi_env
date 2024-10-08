@@ -6,7 +6,7 @@ on:
       train:
         description: 'Select the deployment train'
         required: true
-        default: trainA
+        default: default
         type: choice
         options:
           - default
@@ -29,48 +29,64 @@ jobs:
         shell: bash
         run: |
           echo "Selected train: ${{ github.event.inputs.train }}"
+          cat trains.json
           envs=$(jq -c --arg TRAIN "${{ github.event.inputs.train }}" '.[$TRAIN]' trains.json)
           echo "Environments for ${{ github.event.inputs.train }}: $envs"
           echo "::set-output name=environments::$envs"
 
-  deploy_dev:
-    name: Deploy to Dev
+  deploy_sandbox01:
+    name: Deploy to Sandbox01
     needs: prepare
     runs-on: ubuntu-latest
-    if: contains(needs.prepare.outputs.environments, 'dev')
+    if: contains(needs.prepare.outputs.environments, 'sandbox01')
+    steps:
+      - name: Deploy to Sandbox01
+        run: echo "Deploying to Sandbox01 environment"
+
+  deploy_sandbox02:
+    name: Deploy to Sandbox02
+    needs: [prepare, deploy_sandbox01]
+    runs-on: ubuntu-latest
+    if: >
+      contains(needs.prepare.outputs.environments, 'sandbox02') &&
+      ( !contains(needs.prepare.outputs.environments, 'sandbox01') || needs.deploy_sandbox01.result == 'success' )
+    steps:
+      - name: Deploy to Sandbox02
+        run: echo "Deploying to Sandbox02 environment"
+
+  deploy_dev:
+    name: Deploy to Dev
+    needs: [prepare, deploy_sandbox01, deploy_sandbox02]
+    runs-on: ubuntu-latest
+    if: >
+      contains(needs.prepare.outputs.environments, 'dev') &&
+      ( 
+        ( contains(needs.prepare.outputs.environments, 'sandbox02') && needs.deploy_sandbox02.result == 'success' ) ||
+        ( contains(needs.prepare.outputs.environments, 'sandbox01') && needs.deploy_sandbox01.result == 'success' ) ||
+        ( !contains(needs.prepare.outputs.environments, 'sandbox01') && !contains(needs.prepare.outputs.environments, 'sandbox02') )
+      )
     steps:
       - name: Deploy to Dev
         run: echo "Deploying to Dev environment"
 
-  deploy_test:
-    name: Deploy to Test
+  deploy_non_prod:
+    name: Deploy to Non-Prod
     needs: [prepare, deploy_dev]
     runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'test') &&
+    if: >
+      contains(needs.prepare.outputs.environments, 'non-prod') &&
       ( !contains(needs.prepare.outputs.environments, 'dev') || needs.deploy_dev.result == 'success' )
+    steps:
+      - name: Deploy to Non-Prod
+        run: echo "Deploying to Non-Prod environment"
+
+  deploy_test:
+    name: Deploy to Test
+    needs: [prepare, deploy_non_prod]
+    runs-on: ubuntu-latest
+    if: >
+      contains(needs.prepare.outputs.environments, 'test') &&
+      ( !contains(needs.prepare.outputs.environments, 'non-prod') || needs.deploy_non_prod.result == 'success' )
     steps:
       - name: Deploy to Test
         run: echo "Deploying to Test environment"
-
-  deploy_staging:
-    name: Deploy to Staging
-    needs: [prepare, deploy_test]
-    runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'staging') &&
-      ( !contains(needs.prepare.outputs.environments, 'test') || needs.deploy_test.result == 'success' )
-    steps:
-      - name: Deploy to Staging
-        run: echo "Deploying to Staging environment"
-
-  deploy_prod:
-    name: Deploy to Prod
-    needs: [prepare, deploy_staging]
-    runs-on: ubuntu-latest
-    if: |
-      contains(needs.prepare.outputs.environments, 'prod') &&
-      ( !contains(needs.prepare.outputs.environments, 'staging') || needs.deploy_staging.result == 'success' )
-    steps:
-      - name: Deploy to Prod
-        run: echo "Deploying to Prod environment"
