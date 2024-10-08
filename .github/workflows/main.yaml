@@ -3,68 +3,73 @@ name: Train Deployment
 on:
   workflow_dispatch:
     inputs:
-      start_environment:
+      train:
+        description: 'Select the deployment train'
+        required: true
+        default: trainA
         type: choice
-        description: 'Select the starting environment for deployment train'
         options:
-          - dev
-          - test
-          - non-prod
-          - prod
-        default: dev
-      service_name:
-        type: string
-        description: 'Service name'
-        default: 'shop-cep-service'
-      operation:
-        type: string
-        description: 'Operation'
-        default: 'deploy'       
+          - trainA
+          - trainB
+          - trainC
 
 jobs:
+  prepare:
+    name: Prepare Environments List
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.get-envs.outputs.environments }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read Trains JSON
+        id: get-envs
+        shell: bash
+        run: |
+          echo "Selected train: ${{ github.event.inputs.train }}"
+          envs=$(jq -c --arg TRAIN "${{ github.event.inputs.train }}" '.[$TRAIN]' trains.json)
+          echo "Environments for ${{ github.event.inputs.train }}: $envs"
+          echo "::set-output name=environments::$envs"
+
   deploy_dev:
-    if: ${{ inputs.start_environment == 'dev' || inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
     name: Deploy to Dev
-    uses: topaco/multi_env/.github/workflows/helm.yaml@main
-    with:
-      serviceName: 'shop-cep-service'
-      operation: 'deploy'
-      environment: 'dev'
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: contains(needs.prepare.outputs.environments, 'dev')
+    steps:
+      - name: Deploy to Dev
+        run: echo "Deploying to Dev environment"
 
   deploy_test:
-    if: ${{ inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
-    needs: deploy_dev
     name: Deploy to Test
-    uses: topaco/multi_env/.github/workflows/helm.yaml@main
-    with:
-      serviceName: 'shop-cep-service'
-      operation: 'deploy'
-      environment: 'test'
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+    needs: [prepare, deploy_dev]
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'test') &&
+      ( !contains(needs.prepare.outputs.environments, 'dev') || needs.deploy_dev.result == 'success' )
+    steps:
+      - name: Deploy to Test
+        run: echo "Deploying to Test environment"
 
-  deploy_non_prod:
-    if: ${{ inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
-    needs: deploy_test
-    name: Deploy to Non-Prod
-    uses: topaco/multi_env/.github/workflows/helm.yaml@main
-    with:
-      serviceName: 'shop-cep-service'
-      operation: 'deploy'
-      environment: 'non-prod'
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+  deploy_staging:
+    name: Deploy to Staging
+    needs: [prepare, deploy_test]
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'staging') &&
+      ( !contains(needs.prepare.outputs.environments, 'test') || needs.deploy_test.result == 'success' )
+    steps:
+      - name: Deploy to Staging
+        run: echo "Deploying to Staging environment"
 
   deploy_prod:
-    if: ${{ inputs.start_environment == 'prod' }}
-    needs: deploy_non_prod
     name: Deploy to Prod
-    uses: topaco/multi_env/.github/workflows/helm.yaml@main
-    with:
-      serviceName: 'shop-cep-service'
-      operation: 'deploy'
-      environment: 'prod'
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+    needs: [prepare, deploy_staging]
+    runs-on: ubuntu-latest
+    if: |
+      contains(needs.prepare.outputs.environments, 'prod') &&
+      ( !contains(needs.prepare.outputs.environments, 'staging') || needs.deploy_staging.result == 'success' )
+    steps:
+      - name: Deploy to Prod
+        run: echo "Deploying to Prod environment"
