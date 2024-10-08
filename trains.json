@@ -1,5 +1,6 @@
 {
-  "trainA": ["dev", "test"],
-  "trainB": ["test", "staging"],
-  "trainC": ["staging", "prod"]
+  "default": ["sandbox01", "sandbox02"],
+  "Sandbox01": ["dev"],
+  "Sandbox02": ["non-prod"],
+  "small_env": ["dev", "test"]
 }
