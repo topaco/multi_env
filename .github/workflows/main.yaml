@@ -19,73 +19,28 @@ jobs:
     name: Prepare Environments List
     runs-on: ubuntu-latest
     outputs:
-      environments: ${{ steps.get-envs.outputs.environments }}
+      environments: ${{ steps.prepare.outputs.environments }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Read Trains JSON
-        id: get-envs
-        shell: bash
-        run: |
-          echo "Selected train: ${{ github.event.inputs.train }}"
-          cat trains.json
-          envs=$(jq -c --arg TRAIN "${{ github.event.inputs.train }}" '.[$TRAIN]' trains.json)
-          echo "Environments for ${{ github.event.inputs.train }}: $envs"
-          echo "::set-output name=environments::$envs"
+        id: prepare
+        uses: ./.github/actions/read-trains-json
+        with:
+          train: ${{ github.event.inputs.train }}
 
-  deploy_sandbox01:
-    name: Deploy to Sandbox01
+  deploy:
+    name: Deploy Environments
     needs: prepare
     runs-on: ubuntu-latest
-    if: contains(needs.prepare.outputs.environments, 'sandbox01')
     steps:
-      - name: Deploy to Sandbox01
-        run: echo "Deploying to Sandbox01 environment"
-
-  deploy_sandbox02:
-    name: Deploy to Sandbox02
-    needs: [prepare]
-    runs-on: ubuntu-latest
-    if: >
-      contains(needs.prepare.outputs.environments, 'sandbox02') &&
-      ( !contains(needs.prepare.outputs.environments, 'sandbox01') || always() )
-    steps:
-      - name: Deploy to Sandbox02
-        run: echo "Deploying to Sandbox02 environment"
-
-  deploy_dev:
-    name: Deploy to Dev
-    needs: [prepare]
-    runs-on: ubuntu-latest
-    if: >
-      contains(needs.prepare.outputs.environments, 'dev') &&
-      (
-        ( !contains(needs.prepare.outputs.environments, 'sandbox01') || always() ) &&
-        ( !contains(needs.prepare.outputs.environments, 'sandbox02') || always() )
-      )
-    steps:
-      - name: Deploy to Dev environment
-        run: echo "Deploying to Dev environment"
-
-  deploy_non_prod:
-    name: Deploy to Non-Prod
-    needs: [prepare]
-    runs-on: ubuntu-latest
-    if: >
-      contains(needs.prepare.outputs.environments, 'non-prod') &&
-      ( !contains(needs.prepare.outputs.environments, 'dev') || always() )
-    steps:
-      - name: Deploy to Non-Prod environment
-        run: echo "Deploying to Non-Prod environment"
-
-  deploy_test:
-    name: Deploy to Test
-    needs: [prepare]
-    runs-on: ubuntu-latest
-    if: >
-      contains(needs.prepare.outputs.environments, 'test') &&
-      ( !contains(needs.prepare.outputs.environments, 'non-prod') || always() )
-    steps:
-      - name: Deploy to Test environment
-        run: echo "Deploying to Test environment"
+      - name: Deploy to Environments
+        shell: bash
+        run: |
+          echo "Environments to deploy: ${{ needs.prepare.outputs.environments }}"
+          envs=${{ needs.prepare.outputs.environments }}
+          for env in $(echo $envs | jq -r '.[]'); do
+            echo "Deploying to $env environment"
+            # Add your deployment commands here
+          done
