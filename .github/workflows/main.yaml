@@ -45,48 +45,47 @@ jobs:
 
   deploy_sandbox02:
     name: Deploy to Sandbox02
-    needs: [prepare, deploy_sandbox01]
+    needs: [prepare]
     runs-on: ubuntu-latest
     if: >
       contains(needs.prepare.outputs.environments, 'sandbox02') &&
-      ( !contains(needs.prepare.outputs.environments, 'sandbox01') || needs.deploy_sandbox01.result == 'success' )
+      ( !contains(needs.prepare.outputs.environments, 'sandbox01') || always() )
     steps:
       - name: Deploy to Sandbox02
         run: echo "Deploying to Sandbox02 environment"
 
   deploy_dev:
     name: Deploy to Dev
-    needs: [prepare, deploy_sandbox01, deploy_sandbox02]
+    needs: [prepare]
     runs-on: ubuntu-latest
     if: >
       contains(needs.prepare.outputs.environments, 'dev') &&
-      ( 
-        ( contains(needs.prepare.outputs.environments, 'sandbox02') && needs.deploy_sandbox02.result == 'success' ) ||
-        ( contains(needs.prepare.outputs.environments, 'sandbox01') && needs.deploy_sandbox01.result == 'success' ) ||
-        ( !contains(needs.prepare.outputs.environments, 'sandbox01') && !contains(needs.prepare.outputs.environments, 'sandbox02') )
+      (
+        ( !contains(needs.prepare.outputs.environments, 'sandbox01') || always() ) &&
+        ( !contains(needs.prepare.outputs.environments, 'sandbox02') || always() )
       )
     steps:
-      - name: Deploy to Dev
+      - name: Deploy to Dev environment
         run: echo "Deploying to Dev environment"
 
   deploy_non_prod:
     name: Deploy to Non-Prod
-    needs: [prepare, deploy_dev]
+    needs: [prepare]
     runs-on: ubuntu-latest
     if: >
       contains(needs.prepare.outputs.environments, 'non-prod') &&
-      ( !contains(needs.prepare.outputs.environments, 'dev') || needs.deploy_dev.result == 'success' )
+      ( !contains(needs.prepare.outputs.environments, 'dev') || always() )
     steps:
-      - name: Deploy to Non-Prod
+      - name: Deploy to Non-Prod environment
         run: echo "Deploying to Non-Prod environment"
 
   deploy_test:
     name: Deploy to Test
-    needs: [prepare, deploy_non_prod]
+    needs: [prepare]
     runs-on: ubuntu-latest
     if: >
       contains(needs.prepare.outputs.environments, 'test') &&
-      ( !contains(needs.prepare.outputs.environments, 'non-prod') || needs.deploy_non_prod.result == 'success' )
+      ( !contains(needs.prepare.outputs.environments, 'non-prod') || always() )
     steps:
-      - name: Deploy to Test
+      - name: Deploy to Test environment
         run: echo "Deploying to Test environment"
