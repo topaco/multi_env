@@ -1,38 +1,66 @@
-# File: .github/workflows/helm.yaml
-
-name: Helm Deployment
+name: Train Deployment
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
-      serviceName:
-        required: true
-        type: string
-      operation:
-        required: true
-        type: string
-      environment:
-        required: true
-        type: string
-    secrets:
-      PAT_TOKEN:
-        required: true
+      start_environment:
+        type: choice
+        description: 'Select the starting environment for deployment train'
+        options:
+          - dev
+          - test
+          - non-prod
+          - prod
+        default: dev
+
+env:
+  SERVICE_NAME: shop-cep-service
+  OPERATION: deploy
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  deploy_dev:
+    if: ${{ inputs.start_environment == 'dev' || inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
+    name: Deploy to Dev
+    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    with:
+      serviceName: ${{ env.SERVICE_NAME }}
+      operation: ${{ env.OPERATION }}
+      environment: dev
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-      - name: Set up Helm
-        run: |
-          # Install Helm or any prerequisites
-          echo "Setting up Helm"
+  deploy_test:
+    if: ${{ inputs.start_environment == 'test' || inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
+    needs: deploy_dev
+    name: Deploy to Test
+    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    with:
+      serviceName: ${{ env.SERVICE_NAME }}
+      operation: ${{ env.OPERATION }}
+      environment: test
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
-      - name: Deploy to ${{ inputs.environment }}
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          echo "Deploying ${{ inputs.serviceName }} to ${{ inputs.environment }} environment"
-          # Add your deployment commands here
+  deploy_non_prod:
+    if: ${{ inputs.start_environment == 'non-prod' || inputs.start_environment == 'prod' }}
+    needs: deploy_test
+    name: Deploy to Non-Prod
+    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    with:
+      serviceName: ${{ env.SERVICE_NAME }}
+      operation: ${{ env.OPERATION }}
+      environment: non-prod
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+  deploy_prod:
+    if: ${{ inputs.start_environment == 'prod' }}
+    needs: deploy_non_prod
+    name: Deploy to Prod
+    uses: VF-DigitalEngineering-CloudEngineering/cep-actions-hub/.github/workflows/helm.yaml@main
+    with:
+      serviceName: ${{ env.SERVICE_NAME }}
+      operation: ${{ env.OPERATION }}
+      environment: prod
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
