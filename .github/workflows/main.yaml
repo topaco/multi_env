@@ -9,9 +9,10 @@ on:
         default: trainA
         type: choice
         options:
-          - trainA
-          - trainB
-          - trainC
+          - default
+          - Sandbox01
+          - Sandbox02
+          - small_env
 
 jobs:
   prepare:
