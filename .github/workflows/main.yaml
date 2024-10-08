@@ -38,11 +38,15 @@ jobs:
       - name: Install jq
         run: sudo apt-get install -y jq
 
+      - name: Debug Outputs
+        run: |
+          echo "Environments from prepare job: '${{ needs.prepare.outputs.environments }}'"
+
       - name: Deploy to Environments
         shell: bash
         run: |
           echo "Environments to deploy: ${{ needs.prepare.outputs.environments }}"
-          envs='${{ needs.prepare.outputs.environments }}'
+          envs="${{ needs.prepare.outputs.environments }}"
           for env in $(echo "$envs" | jq -r '.[]'); do
             echo "Deploying to $env environment"
             # Add your deployment commands here
