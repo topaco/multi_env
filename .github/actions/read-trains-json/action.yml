@@ -2,7 +2,6 @@
 
 name: 'Read Trains JSON'
 description: 'Reads trains.json and outputs environments for the selected train'
-author: 'Your Name <your.email@example.com>'
 inputs:
   train:
     description: 'The selected train'
@@ -10,19 +9,19 @@ inputs:
 outputs:
   environments:
     description: 'Environments for the selected train'
+    value: ${{ steps.read-trains.outputs.environments }}
 runs:
   using: 'composite'
   steps:
     - name: Read Trains JSON
-      id: get-envs
+      id: read-trains
       shell: bash
       run: |
         echo "Selected train: ${{ inputs.train }}"
-        cat $GITHUB_ACTION_PATH/trains.json
-        envs=$(jq -c --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' $GITHUB_ACTION_PATH/trains.json)
+        cat "$GITHUB_ACTION_PATH/trains.json"
+        envs=$(jq -c --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' "$GITHUB_ACTION_PATH/trains.json")
         if [ -z "$envs" ] || [ "$envs" == "null" ]; then
           echo "Error: Train '${{ inputs.train }}' not found in trains.json"
           exit 1
         fi
-        echo "Environments for ${{ inputs.train }}: $envs"
-        echo "environments=$envs" >> $GITHUB_OUTPUT
+        echo "environments=$envs" >> "$GITHUB_STEP_OUTPUT"
