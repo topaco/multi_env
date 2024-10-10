@@ -1,6 +1,6 @@
 name: github context
 
-on: workflow_dispatch:
+on: workflow_dispatch
 
 github_cont:
   runs-on: ubuntu-latest
