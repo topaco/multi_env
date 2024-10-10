@@ -2,7 +2,11 @@ name: github context
 
 on: workflow_dispatch
 
-github_cont:
-  runs-on: ubuntu-latest
-  run: |
-      echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
+jobs:
+  github_cont:
+    runs-on: ubuntu-latest
+    steps:
+    - name: running github context
+      id: 123
+      run: |
+          echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
