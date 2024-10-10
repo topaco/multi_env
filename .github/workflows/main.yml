@@ -1,0 +1,8 @@
+name: github context
+
+on: workflow_dispatch:
+
+github_cont:
+  runs-on: ubuntu-latest
+  run: |
+      echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
