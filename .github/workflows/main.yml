@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: running github context
-      id: 123
+      id: gh
       run: |
           echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
