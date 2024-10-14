@@ -57,3 +57,85 @@ jobs:
           # Replace the below echo with your actual deployment commands
           # Example:
           # ./deploy.sh "${{ matrix.environment }}"
+name: Train Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      train:
+        description: 'Select the deployment train'
+        required: true
+        default: default
+        type: choice
+        options:
+          - default
+          - Sandbox01
+          - Sandbox02
+          - small_env
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  prepare:
+    name: Prepare Environments List
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.get-envs.outputs.environments }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read Trains JSON
+        id: get-envs
+        uses: ./.github/actions/read-trains-json
+        with:
+          train: ${{ github.event.inputs.train }}
+
+      - name: Debug Prepare Output
+        run: |
+          echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
+
+  deploy:
+    name: Deploy Environments
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: ${{ fromJson(needs.prepare.outputs.environments) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Debug Deploy Matrix
+        run: |
+          echo "Deploying to environment: ${{ matrix.environment }}"
+
+      - name: Deploy to ${{ matrix.environment }}
+        run: |
+          echo "Deploying to ${{ matrix.environment }} environment"
+          # Replace the below echo with your actual deployment commands
+          # Example:
+          # ./deploy.sh "${{ matrix.environment }}"
+
+          
+  postdeploy:
+    name: Post Deploy Environments
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: ${{ fromJson(needs.prepare.outputs.environments) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Debug Deploy Matrix
+        run: |
+          echo "Deploying to environment: ${{ matrix.environment }}"
+
+      - name: Deploy to ${{ matrix.environment }}
+        run: |
+          echo "Deploying to ${{ matrix.environment }} environment"
+          # Replace the below echo with your actual deployment commands
+          # Example:
+          # ./deploy.sh "${{ matrix.environment }}"
+
+          
