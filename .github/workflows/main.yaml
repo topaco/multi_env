@@ -60,7 +60,7 @@ jobs:
 
   postdeploy:
     name: Post Deploy Environments
-    needs: deploy  # Fix: make postdeploy depend on deploy, not prepare
+    needs: prepare  # Fix: make postdeploy depend on deploy, not prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
