@@ -22,7 +22,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubntu-latest
+    runs-on: ubuntu-latest
     outputs:
       environments: ${{ steps.parse.outputs.environments }}
       is_train: ${{ steps.check_train.outputs.is_train }}
