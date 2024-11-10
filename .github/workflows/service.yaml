@@ -19,7 +19,7 @@ on:
 jobs:
   deploy:
     name: Deploy Service
-    uses: topaco/multi_env/.github/workflows/deploy_template.yml@main
+    uses: topaco/multi_env/.github/workflows/deploy_template.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       target_environments: ${{ github.event.inputs.target_environments }}
