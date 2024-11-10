@@ -29,7 +29,9 @@ jobs:
     steps:
       - name: Approval Test
         run: echo "This job requires manual approval for the 'dev' environment."
+        
   terraform:
+    needs: test_approval
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
       serviceName: test-java-service
