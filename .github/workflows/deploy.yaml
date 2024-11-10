@@ -1,0 +1,37 @@
+name: Deploy to Environment
+
+on:
+  workflow_call:
+    inputs:
+      serviceName:
+        description: 'Name of the service to deploy'
+        required: true
+        type: string
+      operation:
+        description: 'Operation to perform'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: string
+    secrets:
+      PAT_TOKEN:
+        required: true
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+    - name: terraform deploy
+      id: terraform
+      run: echo this is terraform 
+
+  helm:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+     - name: Helm deploy
+       id: Helm
+       run: echo this is Helm 
+    
