@@ -1,0 +1,28 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environments:
+        description: 'Comma-separated list of target environments to deploy to (e.g., dev,sandbox01,sandbox02)'
+        required: false
+        type: string
+      serviceName:
+        description: 'Name of the service to deploy'
+        required: true
+        type: string
+      train:
+        description: 'Define your desired train (for sequential deployment)'
+        required: false  
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy Service
+    uses: topaco/multi_env/.github/workflows/deploy_template.yml@main
+    with:
+      serviceName: ${{ github.event.inputs.serviceName }}
+      target_environments: ${{ github.event.inputs.target_environments }}
+      train: ${{ github.event.inputs.train }}
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
