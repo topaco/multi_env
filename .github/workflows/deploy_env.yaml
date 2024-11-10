@@ -1,95 +1,40 @@
-name: deploy pipeline
+name: Deploy to Environment
 
 on:
   workflow_call:
     inputs:
-      target_environments:
-        description: 'Comma-separated list of target environments to deploy to (e.g., dev,sandbox01,sandbox02)'
-        required: false
-        type: string
       serviceName:
         description: 'Name of the service to deploy'
         required: true
         type: string
-      train:
-        description: 'Define your desired train (for sequential deployment)'
-        required: false  
+      operation:
+        description: 'Operation to perform'
+        required: true
         type: string
-        
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: string
     secrets:
       PAT_TOKEN:
-        required: true        
+        required: true
 
 jobs:
-  prepare:
-    runs-on: cep-agents
-    outputs:
-      environments: ${{ steps.parse.outputs.environments }}
-      is_train: ${{ steps.check_train.outputs.is_train }}
-    steps:
-      - name: Check if train is passed
-        id: check_train
-        run: |
-          if [ -n "${{ github.event.inputs.train }}" ]; then
-            echo "is_train=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_train=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Parse target environments if train is not passed
-        id: parse
-        if: ${{ steps.check_train.outputs.is_train == 'false' }}
-        shell: bash
-        run: |
-          if [ -n "${{ github.event.inputs.target_environments }}" ]; then
-            echo "Parsing target environments"
-            environments=()
-            IFS=',' read -ra ADDR <<< "${{ github.event.inputs.target_environments }}"
-            for env in "${ADDR[@]}"; do
-              env_trimmed=$(echo "$env" | xargs)
-              environments+=("\"$env_trimmed\"")
-            done
-            environments_json="[${environments[*]}]"
-            echo "Parsed environments: $environments_json"
-            echo "environments=${environments[@]}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Print parsed environments for debugging
-        if: ${{ steps.check_train.outputs.is_train == 'false' }}
-        run: 'echo "Parsed environments from prepare job: ${{ steps.parse.outputs.environments }}"'
-
-  deploy_dev:
-    name: Deploy dev
-    needs: prepare
-    if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'dev')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
+  terraform:
+    uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
-      serviceName: ${{ github.event.inputs.serviceName }}
+      serviceName: test-java-service
       operation: deploy
-      environment: dev
+      environment: ${{ inputs.environment }}
     secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  deploy_sandbox01:
-    name: Deploy sandbox01
-    needs: [prepare]
-    if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'sandbox01')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+  helm:
+    needs: terraform
+    uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
-      serviceName: ${{ github.event.inputs.serviceName }}
+      serviceName: test-java-service
       operation: deploy
-      environment: sandbox01
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  deploy_sandbox02:
-    name: Deploy sandbox02
-    needs: [prepare]
-    if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'sandbox02')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
-    with:
-      serviceName: ${{ github.event.inputs.serviceName }}
-      operation: deploy
-      environment: sandbox02
+      environment: ${{ inputs.environment }}
+      certificate_arn: ${{ needs.terraform.outputs.certificate_arn }}
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
