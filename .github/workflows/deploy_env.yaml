@@ -35,6 +35,6 @@ jobs:
       serviceName: test-java-service
       operation: deploy
       environment: ${{ inputs.environment }}
-      certificate_arn: ${{ needs.terraform.outputs.certificate_arn }}
+      #certificate_arn: ${{ needs.terraform.outputs.certificate_arn }}
     secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
