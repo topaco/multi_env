@@ -32,6 +32,7 @@ jobs:
         
   terraform:
     needs: [test_approval]
+    if: ${{ inputs.environment != 'dev' || (inputs.environment == 'dev' && always()) }}
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
       serviceName: test-java-service
