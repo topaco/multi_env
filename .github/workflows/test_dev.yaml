@@ -1,0 +1,13 @@
+name: Test Approval Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_approval:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Approval Test
+        run: echo "This job requires manual approval for the 'dev' environment."
