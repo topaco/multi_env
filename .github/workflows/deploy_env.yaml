@@ -20,6 +20,15 @@ on:
         required: true
 
 jobs:
+
+  test_approval:
+    if: ${{ contains(inputs.environment, 'dev') }}
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Approval Test
+        run: echo "This job requires manual approval for the 'dev' environment."
   terraform:
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
