@@ -62,7 +62,7 @@ jobs:
     name: Deploy dev
     needs: prepare
     if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'dev')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
+    uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       operation: deploy
@@ -74,7 +74,7 @@ jobs:
     name: Deploy sandbox01
     needs: [prepare]
     if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'sandbox01')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
+    uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       operation: deploy
@@ -86,7 +86,7 @@ jobs:
     name: Deploy sandbox02
     needs: [prepare]
     if: ${{ needs.prepare.outputs.is_train == 'true' || (needs.prepare.outputs.is_train == 'false' && contains(needs.prepare.outputs.environments, 'sandbox02')) }}
-    uses: topaco/multi_env/.github/workflows/deploy_env@main
+    uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       operation: deploy
