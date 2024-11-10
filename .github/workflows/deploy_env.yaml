@@ -22,7 +22,7 @@ on:
 jobs:
 
   test_approval:
-    if: ${{ contains(inputs.environment, 'dev') }}
+    if: ${{ inputs.environment == 'dev' }}
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -31,7 +31,7 @@ jobs:
         run: echo "This job requires manual approval for the 'dev' environment."
         
   terraform:
-    needs: test_approval
+    needs: [test_approval]
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
       serviceName: test-java-service
