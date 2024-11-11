@@ -21,17 +21,17 @@ on:
 
 jobs:
 
-  test_approval:
-    if: ${{ inputs.environment == 'dev' }}
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ inputs.environment}}
-    steps:
-      - name: Approval Test
-        run: echo "This job requires manual approval for the 'dev' environment."
+  #test_approval:
+   # if: ${{ inputs.environment == 'dev' }}
+   # runs-on: ubuntu-latest
+   # environment:
+   #   name: ${{ inputs.environment}}
+   # steps:
+   #   - name: Approval Test
+   #     run: echo "This job requires manual approval for the 'dev' environment."
         
   terraform:
-    needs: [test_approval]
+    #needs: [test_approval]
     if: ${{ inputs.environment != 'dev' || (inputs.environment == 'dev' && always()) }}
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
     with:
