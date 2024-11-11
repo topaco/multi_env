@@ -35,7 +35,7 @@ jobs:
     uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
-      environments: ${{ matrix.target }}
+      environment: ${{ matrix.target }}
       train: ${{ github.event.inputs.train }}
       operation: deploy
     secrets: 
