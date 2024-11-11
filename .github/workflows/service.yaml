@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [Development, Production ]
+        target: [dev, sandbox01 ]
     uses: topaco/multi_env/.github/workflows/deploy_template.yaml@main
     with:
       target-env: ${ { matrix.target } }
