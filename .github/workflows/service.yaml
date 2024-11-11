@@ -11,10 +11,6 @@ on:
         description: 'Name of the service to deploy'
         required: true
         type: string
-      train:
-        description: 'Define your desired train (for sequential deployment)'
-        required: false  
-        type: string
 
 jobs:
   #deploy:
