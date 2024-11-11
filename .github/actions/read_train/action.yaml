@@ -4,6 +4,9 @@ inputs:
   train:
     description: 'The selected train'
     required: true
+  PAT_TOKEN:
+    description: 'Personal Access Token for repository access'
+    required: true
 outputs:
   environments:
     description: 'Environments for the selected train'
@@ -23,7 +26,7 @@ runs:
         repository: topaco/metadata
         path: metadata
         ref: main
-        token: ${{ secrets.PAT_TOKEN }} # Use the passed secret
+        token: ${{ inputs.PAT_TOKEN }} # Use the input instead of secrets.PAT_TOKEN
 
     - name: Read Trains YAML
       id: read-trains
