@@ -32,7 +32,7 @@ jobs:
       fail-fast: true
       matrix:
         target: [dev, sandbox01 ]
-    uses: topaco/multi_env/.github/workflows/deploy_template.yaml@main
+    uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       target_environments: ${ { matrix.target } }
