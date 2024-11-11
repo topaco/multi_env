@@ -13,8 +13,13 @@ on:
         type: string
       train:
       required: true
-      type: string
-
+      type: 
+        choice:
+          - default
+          - Sandbox01
+          - Sandbox02
+          - small_env
+          
 jobs:
   prepare:
     name: Prepare Environments List
