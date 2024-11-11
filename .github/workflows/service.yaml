@@ -26,6 +26,7 @@ jobs:
   ReuseableMatrixJobForDeployment:
     strategy:
       fail-fast: true
+      max-parallel: 1
       matrix:
         target: [dev, sandbox01 ]
     uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
