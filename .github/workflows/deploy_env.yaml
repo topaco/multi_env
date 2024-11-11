@@ -43,6 +43,7 @@ jobs:
   helm:
     needs: terraform
     uses: topaco/multi_env/.github/workflows/deploy.yaml@main
+    if: ${{ inputs.environment != 'dev' || (inputs.environment == 'dev' && always()) }}
     with:
       serviceName: test-java-service
       operation: deploy
