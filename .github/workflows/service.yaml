@@ -16,6 +16,7 @@ on:
           - Sandbox01
           - Sandbox02
           - small_env
+
 jobs:
   prepare:
     name: Prepare Environments List
@@ -31,6 +32,7 @@ jobs:
         uses: topaco/multi_env/.github/actions/read_train@main
         with:
           train: ${{ github.event.inputs.train }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }} # Pass the PAT_TOKEN as an input
 
       - name: Debug Prepared Environments
         run: |
@@ -48,5 +50,5 @@ jobs:
       serviceName: ${{ github.event.inputs.serviceName }}
       environment: ${{ matrix.target }}
       operation: deploy
-    secrets: 
+    secrets:
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
