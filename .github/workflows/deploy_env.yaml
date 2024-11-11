@@ -25,7 +25,7 @@ jobs:
     if: ${{ inputs.environment == 'dev' }}
     runs-on: ubuntu-latest
     environment:
-      name: dev
+      name: ${{ inputs.environment}}
     steps:
       - name: Approval Test
         run: echo "This job requires manual approval for the 'dev' environment."
