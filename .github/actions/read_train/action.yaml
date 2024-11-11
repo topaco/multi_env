@@ -33,10 +33,11 @@ runs:
       shell: bash
       run: |
         echo "Selected train: ${{ inputs.train }}"
-        envs=$(yq -o=json -c --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' "metadata/v1/trains.yaml")
+        envs=$(yq eval -o=json --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' "metadata/v1/trains.yaml")
         echo "Parsed environments: $envs"
         if [ -z "$envs" ] || [ "$envs" == "null" ]; then
           echo "Error: Train '${{ inputs.train }}' not found in trains.yaml"
           exit 1
         fi
         echo "environments=$envs" >> "$GITHUB_OUTPUT"
+
