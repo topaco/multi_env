@@ -17,15 +17,15 @@ on:
         type: string
 
 jobs:
-  deploy:
-    name: Deploy Service
-    uses: topaco/multi_env/.github/workflows/deploy_template.yaml@main
-    with:
-      serviceName: ${{ github.event.inputs.serviceName }}
-      target_environments: ${{ github.event.inputs.target_environments }}
-      train: ${{ github.event.inputs.train }}
-    secrets:
-      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+  #deploy:
+   # name: Deploy Service
+    #uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
+    #with:
+     # serviceName: ${{ github.event.inputs.serviceName }}
+      #target_environments: ${{ github.event.inputs.target_environments }}
+      #train: ${{ github.event.inputs.train }}
+    #secrets:
+     # PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   ReuseableMatrixJobForDeployment:
     strategy:
@@ -37,4 +37,5 @@ jobs:
       serviceName: ${{ github.event.inputs.serviceName }}
       target_environments: ${ { matrix.target } }
       train: ${{ github.event.inputs.train }}
-    secrets: inherit
+    secrets: 
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
