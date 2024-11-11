@@ -32,7 +32,6 @@ jobs:
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
       environment: ${{ matrix.target }}
-      train: ${{ github.event.inputs.train }}
       operation: deploy
     secrets: 
       PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
