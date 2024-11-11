@@ -19,6 +19,7 @@ runs:
         ref: main  # Use the specific branch or tag where trains.yaml is located
 
     - name: Install yq
+      shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install -y yq
