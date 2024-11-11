@@ -13,22 +13,33 @@ on:
         type: string
 
 jobs:
-  #deploy:
-   # name: Deploy Service
-    #uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
-    #with:
-     # serviceName: ${{ github.event.inputs.serviceName }}
-      #target_environments: ${{ github.event.inputs.target_environments }}
-      #train: ${{ github.event.inputs.train }}
-    #secrets:
-     # PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+  prepare:
+    name: Prepare Environments List
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.get-envs.outputs.environments }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read Trains YAML
+        id: get-envs
+        uses: topaco/multi_env/.github/actions/read_train@main
+        with:
+          train: ${{ github.event.inputs.train }}
+
+      - name: Debug Prepared Environments
+        run: |
+          echo "Prepared environments: ${{ steps.get-envs.outputs.environments }}"
 
   ReuseableMatrixJobForDeployment:
+    needs: prepare
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       max-parallel: 1
       matrix:
-        target: [dev, sandbox01 ]
+        target: ${{ fromJson(needs.prepare.outputs.environments) }}
     uses: topaco/multi_env/.github/workflows/deploy_env.yaml@main
     with:
       serviceName: ${{ github.event.inputs.serviceName }}
