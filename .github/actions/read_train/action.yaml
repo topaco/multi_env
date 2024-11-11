@@ -1,0 +1,37 @@
+name: 'Read Trains YAML'
+description: 'Reads trains.yaml and outputs environments for the selected train'
+inputs:
+  train:
+    description: 'The selected train'
+    required: true
+outputs:
+  environments:
+    description: 'Environments for the selected train'
+    value: ${{ steps.read-trains.outputs.environments }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout metadata repository
+      uses: actions/checkout@v3
+      with:
+        repository: topaco/metadata
+        path: metadata
+        ref: main  # Use the specific branch or tag where trains.yaml is located
+
+    - name: Install yq
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y yq
+
+    - name: Read Trains YAML
+      id: read-trains
+      shell: bash
+      run: |
+        echo "Selected train: ${{ inputs.train }}"
+        envs=$(yq -o=json -c --arg TRAIN "${{ inputs.train }}" '.[$TRAIN]' "metadata/v1/trains.yaml")
+        echo "Parsed environments: $envs"
+        if [ -z "$envs" ] || [ "$envs" == "null" ]; then
+          echo "Error: Train '${{ inputs.train }}' not found in trains.yaml"
+          exit 1
+        fi
+        echo "environments=$envs" >> "$GITHUB_OUTPUT"
