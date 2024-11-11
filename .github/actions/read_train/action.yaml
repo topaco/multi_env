@@ -11,18 +11,19 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout metadata repository
-      uses: actions/checkout@v3
-      with:
-        repository: topaco/metadata
-        path: metadata
-        ref: main  # Use the specific branch or tag where trains.yaml is located
-
     - name: Install yq
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install -y yq
+
+    - name: Checkout metadata repository
+      uses: actions/checkout@v3
+      with:
+        repository: topaco/metadata
+        path: metadata
+        ref: main
+        token: ${{ secrets.PAT_TOKEN }} # Use the passed secret
 
     - name: Read Trains YAML
       id: read-trains
