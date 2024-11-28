@@ -1,5 +1,5 @@
 {
-  "trainA": ["dev", "test"],
+  'trainA': ["dev", "test"],
   "trainB": ["test", "staging"],
   "trainC": ["staging", "prod"]
 }
